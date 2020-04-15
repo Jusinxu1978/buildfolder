@@ -10,10 +10,13 @@
     能够实现下载过程，即从0%到100%可视化
 """
 # =====================================================
-#from six.moves import urllib
+import urllib
 import os
 import sys
 #from email.policy import default
+from findallurl import FindAllUrl
+
+url = "http://nas.autoflight.com/deployment/product/v40-standard/beta/latest/latest/modules/"
 
 def mkdir(path):
 
@@ -41,51 +44,9 @@ def mkdir(path):
         return False     
 # 定义要创建的目录
 defaultRootPath = "D:\\AutoFlight\\智能开发部\\整机软件发布\\V40\\V40-standard-v0.0.7-beta\\modules\\"
-mkpaths=["Router_D321-drone\\",
-        "FC\\",
-        "AFPC\\",
-        "TX2-yolov3_detector\\",
-        "GMB\\",
-        "TRA300-V40\\",
-        "Cam-APP\\",
-        "ESC-R7012\\",
-        "TX2-Ros-xenial_aarch64\\",
-        "ESC-R8016\\",
-        "ESC-R7025\\",
-        "AFPC\\",
-        "GBOB_BOOTLOAD\\",
-        "Gimbal-BL\\",
-        "DroneHealth\\",
-        "SERVO-BL\\",
-        "TX2-Ros-xenial_x86_64_all\\",
-        "TX2-videostreamer\\",
-        "BEC-100V\\",
-        "TX2-Ros-xenial_x86_64\\",
-        "AFGC\\",
-        "G50T\\",
-        "TX2-pure_repeator\\",
-        "ESC-BL\\",
-        "ACRepeat\\",
-        "TX2-kcf_tracker\\",
-        "SERVO-KST\\",
-        "TX2-perception_msgs\\",
-        "TX2-Ros-win10_x86_64\\",
-        "BEC-BL\\",
-        "G51T\\",
-        "Router_D321-tracker\\",
-        "AIRDATA\\",
-        "LinkHub\\"]
+
 # 调用函数
-
-for adir in mkpaths:
-    adir = defaultRootPath+adir
-    mkdir(adir)
-    
-    
-
-
-
-def download_and_extract(filepath, save_dir):
+def download_and_extract(url, save_dir):
     """
             根据给定的URL地址下载文件
 
@@ -95,37 +56,47 @@ def download_and_extract(filepath, save_dir):
     Return:
 None
 """ 
-"""   
-    for url, index in zip(filepath, range(len(filepath))):
-filename = url.split('/')[-1]
-save_path = os.path.join(save_dir, filename)
-urllib.request.urlretrieve(url, save_path)
-sys.stdout.write('\r>> Downloading %.1f%%' % (float(index + 1) / float(len(filepath)) * 100.0))
-sys.stdout.flush()
-    print('\nSuccessfully downloaded')
 
+    filename = url.split('/')[-1]
+    save_path = os.path.join(save_dir, filename)
+    print(url)
+    print(save_path)
+    try:
+        urllib.request.urlretrieve(url, save_path)
+#         sys.stdout.write('\r>> Downloading %.1f%%' % (float(index + 1) / float(len(filepath)) * 100.0))
+#         sys.stdout.flush()
+    except Exception as e:
+        print("Error occurred when downloading file, error message:")
+        print(e)
+    else:
+        print(url+' Successfully downloaded\n')
 
-def _get_file_urls(file_url_txt):
-    根据URL路径txt文件，获取URL地址列表
+allUrl = FindAllUrl(url)
+allUrl.getAllUrlInPage(allUrl.url)
 
-    Parameter:
-file_url_txt: str  txt文件本地路径
-    Return:
-filepath: list  URL列表
+count = 1
+
+for link in allUrl.alllinks:
     
-    filepath = []
-    file = open(file_url_txt, 'r')
-    for line in file.readlines():
-line = line.strip()
-filepath.append(line)
-    file.close()
-    return filepath
-
-
-if __name__ == '__main__':
-    file_url_txt = 'file_url_txt.txt'
-    save_dir = ''
-    filepath = _get_file_urls(file_url_txt)
-    download_and_extract(filepath, save_dir)
+    print("link:"+link,count)
+    count+=1
     
-    """
+print(len(allUrl.alllinks))
+
+for adir in allUrl.alllinks:
+    filepath = adir + "RELEASENOTE.md"
+    adirlist = adir.split("/")
+    adir = adirlist[-2]
+    adir = defaultRootPath+adir+"\\"
+    print(adir)
+    mkdir(adir)
+    download_and_extract(filepath,adir)
+    
+    
+
+
+
+
+
+
+    
