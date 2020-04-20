@@ -3,17 +3,15 @@ import re
 from _ast import Try
 # url = "http://nas.autoflight.com/deployment/product/v40-standard/beta/latest/latest/"
 class FindAllUrl():
-    def __init__(self,url):
-        #connect to a URL
-        self.url = url
-        self.alllinks = []
-    def getCurrentUrlInPage(self,url):
+    
+
+    def getCurrentUrlInPage(self,modulesUrl):
         try:
-            website = urllib.request.urlopen(url)
+            moduleswebsite = urllib.request.urlopen(modulesUrl)
         except:
             print("url open error")
         #read html code
-        html = website.read()
+        html = moduleswebsite.read()
     #     print(html)
         #use re.findall to get all the links
         newlinks = []
@@ -23,17 +21,45 @@ class FindAllUrl():
             link = re.findall('"([^"]+)"', link)
             newlinks.append(link[0])
         return newlinks
-
-    def getAllUrlInPage(self,url):
-        links = self.getCurrentUrlInPage(url)
+    
+     
+    def getAllUrlInPage(self,modulesUrl):
+        links = self.getCurrentUrlInPage(modulesUrl)
         if len(links) == 0:
             return
         else:
             for link in links:
-                newUrl = url+link
+                newUrl = modulesUrl+link
                 self.alllinks.append(newUrl)
                 self.getAllUrlInPage(newUrl)
             
+    def __init__(self,url):
+        #connect to a URL
+        self.url = url
+        self.modulesUrl = url + "modules/"
+        print(self.modulesUrl)
+        self.alllinks = []
+        try:
+            website = urllib.request.urlopen(url)
+        except:
+            print("url open error")
+        #read html code
+        html = website.read()
+        links = re.findall('<a href=\".*?.yml\"', html.decode('utf-8'))
+        link = re.findall('"([^"]+)"', links[0])
+        self.configure= link[0]
+        
+        self.projectName = self.configure[0:-4]
+        
+        self.getAllUrlInPage(self.modulesUrl)
+        
+        print(self.url)
+        print(self.modulesUrl)
+        print(self.alllinks)
+        print(self.configure)
+        print(self.projectName)
+        
+        
 # allurl = FindAllUrl(url)
 # allurl.getAllUrlInPage(allurl.url)
 # 
